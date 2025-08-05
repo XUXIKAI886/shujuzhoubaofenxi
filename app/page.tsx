@@ -154,7 +154,7 @@ export default function HomePage() {
       <div className={`mx-auto px-4 ${currentStep === 'report' ? 'max-w-7xl' : 'max-w-4xl'}`}>
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            美团外卖数据统计周报系统
+            美团外卖数据统计周报系统升级版
           </h1>
           <p className="text-gray-600">
             输入店铺数据，自动生成专业的运营分析报告
