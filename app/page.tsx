@@ -107,22 +107,15 @@ export default function HomePage() {
       case 'report':
         return (
           <div className="space-y-4">
-            <ReportDisplay 
-              htmlContent={reportHtml}
-              onBackToForm={() => {
-                setCurrentStep('shop-info');
-                setReportHtml('');
-                setError('');
-              }}
-            />
-            <div className="flex space-x-2">
-              <Button 
-                variant="outline" 
+            {/* 操作按钮移到报告上方 */}
+            <div className="flex flex-wrap gap-2 justify-between mb-4">
+              <Button
+                variant="outline"
                 onClick={() => setCurrentStep('data-input')}
               >
                 上一步
               </Button>
-              <Button 
+              <Button
                 onClick={() => {
                   setCurrentStep('shop-info');
                   setReportHtml('');
@@ -131,11 +124,14 @@ export default function HomePage() {
                   setOperationData(null);
                   setPromotionData(undefined);
                 }}
-                className="flex-1"
               >
-                重新开始
+                重新生成
               </Button>
             </div>
+
+            <ReportDisplay
+              htmlContent={reportHtml}
+            />
           </div>
         );
       

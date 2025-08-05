@@ -45,11 +45,9 @@ function convertTextToHTML(text: string): string {
 
 interface ReportDisplayProps {
   htmlContent: string;
-  onBackToForm: () => void;
 }
 
-export function ReportDisplay({ htmlContent, onBackToForm }: ReportDisplayProps) {
-  const [showRawHtml, setShowRawHtml] = useState(false);
+export function ReportDisplay({ htmlContent }: ReportDisplayProps) {
   const [processedHtml, setProcessedHtml] = useState<string>('');
 
   useEffect(() => {
@@ -128,73 +126,34 @@ export function ReportDisplay({ htmlContent, onBackToForm }: ReportDisplayProps)
     setProcessedHtml(processedContent);
   }, [htmlContent]);
 
-  const downloadReport = () => {
-    // 下载时使用处理后的HTML内容
-    const blob = new Blob([processedHtml], { type: 'text/html;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `数据周报_${new Date().getFullYear()}${String(new Date().getMonth() + 1).padStart(2, '0')}${String(new Date().getDate()).padStart(2, '0')}.html`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  };
 
-  const printReport = () => {
-    const printWindow = window.open('', '_blank');
-    if (printWindow) {
-      printWindow.document.write(processedHtml);
-      printWindow.document.close();
-      printWindow.focus();
-      printWindow.print();
-    }
-  };
 
   return (
     <>
-      {/* 操作按钮 */}
-      <div className="flex flex-wrap gap-2 justify-between mb-4">
-        <Button variant="outline" onClick={onBackToForm}>
-          重新生成
-        </Button>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={() => setShowRawHtml(!showRawHtml)}>
-            {showRawHtml ? '查看预览' : '查看代码'}
-          </Button>
-          <Button variant="outline" onClick={printReport}>
-            打印报告
-          </Button>
-          <Button onClick={downloadReport}>
-            下载报告
-          </Button>
-        </div>
-      </div>
 
       {/* 报告内容 - 直接显示，无额外包装 */}
-      {showRawHtml ? (
-        <div className="bg-gray-100 p-4 rounded-lg mb-4 w-full max-w-none">
-          <pre className="text-sm whitespace-pre-wrap break-words">
-            {htmlContent}
-          </pre>
-        </div>
-      ) : (
-        <div 
-          className="w-full max-w-none"
-          style={{
-            width: '100%',
-            maxWidth: 'none',
-            minWidth: '900px'
-          }}
-          dangerouslySetInnerHTML={{ __html: processedHtml }}
-        />
-      )}
+      <div
+        className="w-full max-w-none"
+        style={{
+          width: '100%',
+          maxWidth: 'none',
+          minWidth: '900px'
+        }}
+        dangerouslySetInnerHTML={{ __html: processedHtml }}
+      />
 
       {/* 提示信息 */}
-      <div className="text-sm text-gray-500 bg-blue-50 p-3 rounded-lg border border-blue-200 mt-4">
+      <div
+        className="text-sm text-gray-500 bg-blue-50 p-3 rounded-lg border border-blue-200 mt-4"
+        style={{
+          width: '100%',
+          maxWidth: 'none',
+          minWidth: '900px'
+        }}
+      >
         <p className="font-medium text-blue-800">提示信息：</p>
         <p className="text-blue-700">
-          此报告内容由AI生成，完整保留所有样式和格式。请仔细核查数据准确性。下载的HTML文件可以在浏览器中打开查看完整格式。
+          此报告内容由呈尚策划运营部生成，完整保留所有样式和格式。请仔细核查数据准确性。
         </p>
       </div>
     </>
