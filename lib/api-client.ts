@@ -23,7 +23,7 @@ export class APIClient {
         const prompt = buildReportPrompt(data);
         
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 30000); // 30秒超时
+        const timeoutId = setTimeout(() => controller.abort(), 60000); // 60秒超时，给AI更多时间生成完整内容
 
         const response = await fetch(this.baseUrl, {
           method: 'POST',
@@ -40,7 +40,8 @@ export class APIClient {
               }
             ],
             temperature: 0.7,
-            max_tokens: 4000
+            max_tokens: 8000,
+            stream: false
           }),
           signal: controller.signal
         });

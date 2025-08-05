@@ -150,67 +150,49 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
-      <div className={`mx-auto px-4 py-8 ${currentStep === 'report' ? 'max-w-7xl' : 'max-w-5xl'}`}>
-        {/* 顶部标题区域 */}
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl mb-6 shadow-lg">
-            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-            </svg>
-          </div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-3">
-            数据周报生成器
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className={`mx-auto px-4 ${currentStep === 'report' ? 'max-w-7xl' : 'max-w-4xl'}`}>
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            美团外卖数据统计周报系统
           </h1>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            AI驱动的智能数据分析，一键生成专业运营报告
+          <p className="text-gray-600">
+            输入店铺数据，自动生成专业的运营分析报告
           </p>
         </div>
 
         {/* 进度指示器 */}
-        <div className="mb-12">
-          <div className="flex items-center justify-center">
-            <div className="flex items-center space-x-8">
-              {[
-                { key: 'shop-info', label: '店铺信息', icon: '🏪' },
-                { key: 'data-input', label: '数据录入', icon: '📊' },
-                { key: 'report', label: '生成报告', icon: '📋' }
-              ].map((step, index) => (
-                <div key={step.key} className="flex items-center">
-                  <div className="flex flex-col items-center">
-                    <div className={`relative w-12 h-12 rounded-xl flex items-center justify-center text-lg font-semibold transition-all duration-300 ${
-                      currentStep === step.key 
-                        ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg scale-110' 
-                        : getStepIndex(currentStep) > index
-                        ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-md'
-                        : 'bg-white text-gray-400 shadow-sm border border-gray-200'
-                    }`}>
-                      {getStepIndex(currentStep) > index ? '✓' : step.icon}
-                      {currentStep === step.key && (
-                        <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl blur opacity-25"></div>
-                      )}
-                    </div>
-                    <span className={`mt-3 text-sm font-medium transition-colors ${
-                      currentStep === step.key ? 'text-blue-600' : 'text-gray-500'
-                    }`}>
-                      {step.label}
-                    </span>
-                  </div>
-                  {index < 2 && (
-                    <div className={`w-16 h-0.5 mx-4 transition-colors ${
-                      getStepIndex(currentStep) > index ? 'bg-green-400' : 'bg-gray-200'
-                    }`} />
-                  )}
+        <div className="mb-8">
+          <div className="flex items-center justify-center space-x-4">
+            {[
+              { key: 'shop-info', label: '店铺信息' },
+              { key: 'data-input', label: '数据录入' },
+              { key: 'report', label: '生成报告' }
+            ].map((step, index) => (
+              <div key={step.key} className="flex items-center">
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+                  currentStep === step.key 
+                    ? 'bg-blue-600 text-white' 
+                    : getStepIndex(currentStep) > index
+                    ? 'bg-green-600 text-white'
+                    : 'bg-gray-300 text-gray-600'
+                }`}>
+                  {index + 1}
                 </div>
-              ))}
-            </div>
+                <span className={`ml-2 text-sm ${
+                  currentStep === step.key ? 'text-blue-600 font-medium' : 'text-gray-600'
+                }`}>
+                  {step.label}
+                </span>
+                {index < 2 && (
+                  <div className="w-8 h-px bg-gray-300 mx-4" />
+                )}
+              </div>
+            ))}
           </div>
         </div>
 
-        {/* 主要内容区域 */}
-        <div className="relative">
-          {renderStep()}
-        </div>
+        {renderStep()}
       </div>
     </div>
   );
