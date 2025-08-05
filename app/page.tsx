@@ -149,7 +149,7 @@ export default function HomePage() {
     <div className="min-h-screen bg-gray-50">
       {/* 专业页头设计 */}
       <header className="header-gradient shadow-xl">
-        <div className="max-w-7xl mx-auto px-4 py-6 relative z-10">
+        <div className={`mx-auto px-4 py-6 relative z-10 ${currentStep === 'report' ? 'max-w-none' : 'max-w-7xl'}`}>
           <div className="flex items-center justify-between">
             {/* 左侧：系统标题和图标 */}
             <div className="flex items-center space-x-4">
