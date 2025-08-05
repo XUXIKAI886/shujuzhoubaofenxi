@@ -71,15 +71,33 @@ export function buildReportPrompt(data: ReportData): string {
 
 ${promotionSection}
 
+**表格格式要求**：数据表格必须严格按照以下5列结构：
+
+| 指标 | 本周数据 | 上周数据 | 变化趋势 | 变化百分比 |
+|------|----------|----------|----------|------------|
+| 曝光人数 | ${operationData.thisWeek.exposureCount} | ${operationData.lastWeek.exposureCount} | 上升/下降 | ${exposureChange} |
+| 入店人数 | ${operationData.thisWeek.visitCount} | ${operationData.lastWeek.visitCount} | 上升/下降 | ${visitChange} |
+| 入店转化率 | ${operationData.thisWeek.visitConversionRate}% | ${operationData.lastWeek.visitConversionRate}% | 上升/下降 | 计算变化 |
+| 下单转化率 | ${operationData.thisWeek.orderConversionRate}% | ${operationData.lastWeek.orderConversionRate}% | 上升/下降 | 计算变化 |
+| 下单人数 | ${operationData.thisWeek.orderCount} | ${operationData.lastWeek.orderCount} | 上升/下降 | ${orderChange} |
+| 复购率 | ${operationData.thisWeek.repurchaseRate}% | ${operationData.lastWeek.repurchaseRate}% | 上升/下降 | 计算变化 |
+${promotionData ? `| 推广花费 | ¥${promotionData.thisWeek.cost} | ¥${promotionData.lastWeek.cost} | 上升/下降 | 计算变化 |
+| 推广曝光量 | ${promotionData.thisWeek.exposureCount} | ${promotionData.lastWeek.exposureCount} | 上升/下降 | 计算变化 |
+| 推广进店量 | ${promotionData.thisWeek.visitCount} | ${promotionData.lastWeek.visitCount} | 上升/下降 | 计算变化 |
+| 推广进店率 | ${promotionData.thisWeek.visitRate}% | ${promotionData.lastWeek.visitRate}% | 上升/下降 | 计算变化 |
+| 单次进店成本 | ¥${promotionData.thisWeek.costPerVisit} | ¥${promotionData.lastWeek.costPerVisit} | 上升/下降 | 计算变化 |` : ''}
+
 **输出格式**：请直接返回完整的HTML代码片段，包含以下结构：
 
 1. 完整CSS样式（使用#0073e6蓝色主题，专业麦肯锡风格）
 2. 报告标题和店铺信息
-3. 数据表格（包含所有指标和变化趋势）
+3. **严格按照5列格式的数据表格**（指标|本周数据|上周数据|变化趋势|变化百分比）
 4. 深度分析（每个指标详细解读，确保内容完整）
 5. 改进建议（具体可执行的措施）
 
-**要求**：
+**关键要求**：
+- **表格必须5列对齐**：每个数据单独占一列，不要混合显示
+- **变化百分比单独一列**：不要与本周数据混在一起
 - 使用麦肯锡咨询报告专业风格
 - 蓝色主题色#0073e6
 - 使用Font Awesome图标，禁用emoji
