@@ -1,0 +1,114 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## 项目概述
+
+这是一个基于Next.js 14构建的美团外卖数据统计周报系统，使用App Router架构。系统集成Gemini API生成专业的数据分析报告，支持店铺信息录入、运营数据分析和HTML报告导出。
+
+## 核心技术栈
+
+- **前端**: Next.js 14 (App Router) + TypeScript + Tailwind CSS  
+- **组件库**: shadcn/ui + Radix UI
+- **表单验证**: Zod schema validation
+- **AI集成**: Gemini API (通过自定义API客户端)
+- **安全**: DOMPurify (HTML清理)
+
+## 常用开发命令
+
+### 开发环境
+```bash
+npm run dev          # 启动开发服务器 (localhost:3000)
+npm run build        # 构建生产版本
+npm run start        # 启动生产服务器
+npm run lint         # ESLint代码检查
+```
+
+### 测试系统
+```bash
+npm run test         # 运行完整测试套件
+npm run test:unit    # 单元测试
+npm run test:component # 组件测试
+npm run test:integration # 集成测试  
+npm run test:e2e     # 端到端测试
+npm run test:security # 安全测试
+npm run test:watch   # 监听模式测试
+npm run test:quick   # 快速测试
+npm run test:coverage # 测试覆盖率报告
+```
+
+## 核心架构模式
+
+### 数据流架构
+1. **表单组件** (`ShopInfoForm.tsx`, `DataInputForm.tsx`) → 收集用户输入
+2. **数据验证** (`lib/validations.ts`) → Zod schema验证 
+3. **API路由** (`app/api/generate-report/route.ts`) → 处理报告生成请求
+4. **API客户端** (`lib/api-client.ts`) → 封装Gemini API调用，包含重试机制
+5. **提示词系统** (`lib/prompt-templates.ts`) → 结构化AI提示词生成
+6. **报告展示** (`ReportDisplay.tsx`) → 安全的HTML内容渲染
+
+### 类型系统设计
+- `ShopBasicInfo`: 店铺基础信息结构
+- `PeriodData`: 周期性运营数据（本周/上周对比）
+- `PromotionData`: 推广数据（可选模块）
+- `ReportData`: 完整报告数据聚合
+- `APIResponse`: 统一API响应格式
+
+### 测试架构
+使用自定义测试运行器 (`__tests__/test-runner.js`) 支持分层测试：
+- **单元测试**: lib/目录下的工具函数和验证逻辑
+- **组件测试**: React组件渲染和交互测试
+- **集成测试**: API路由和数据流测试
+- **安全测试**: XSS防护和输入验证测试
+- **E2E测试**: 完整用户工作流程测试
+
+## 关键开发注意事项
+
+### API集成模式
+- 使用环境变量配置API端点 (`API_BASE_URL`, `API_MODEL`)
+- 实现30秒超时和3次重试机制
+- API密钥通过客户端输入，不存储在服务器
+
+### 安全实践
+- 使用DOMPurify清理所有HTML内容
+- Zod验证所有用户输入
+- API路由实现错误边界处理
+- 客户端API密钥临时使用不持久化
+
+### 数据验证规则
+- 整数字段：曝光人数、入店人数、下单人数等
+- 百分比字段：转化率、复购率等（0-100%范围）
+- 必填字段：店铺名称、品类、地址、营业时间
+
+### 组件设计模式
+- 使用shadcn/ui基础组件构建UI
+- 表单组件与业务逻辑分离
+- 加载状态统一管理 (`LoadingSpinner.tsx`)
+- 响应式设计支持移动端
+
+## 文件结构重点
+
+```
+app/api/generate-report/route.ts  # 核心API端点，处理报告生成
+lib/api-client.ts                 # Gemini API集成，重试和错误处理
+lib/prompt-templates.ts           # AI提示词模板系统
+lib/types.ts                      # 完整TypeScript类型定义
+lib/validations.ts               # Zod验证schemas
+components/DataInputForm.tsx      # 核心数据输入组件
+components/ReportDisplay.tsx      # 安全HTML报告渲染
+__tests__/test-runner.js         # 自定义测试运行器
+```
+
+## 扩展开发指南
+
+### 添加新的数据字段
+1. 更新 `lib/types.ts` 中的相关接口
+2. 修改 `lib/validations.ts` 中的验证规则
+3. 更新表单组件的输入字段
+4. 调整 `lib/prompt-templates.ts` 中的提示词模板
+
+### 集成新的AI服务
+1. 扩展 `APIClient` 类支持多个提供商
+2. 添加相应的环境变量配置
+3. 实现统一的错误处理和重试逻辑
+4. 更新类型定义以支持不同的响应格式
