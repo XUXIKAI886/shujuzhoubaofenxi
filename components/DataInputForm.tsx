@@ -606,14 +606,24 @@ export function DataInputForm({ onSubmit }: DataInputFormProps) {
                     <Label>推广花费 (¥)</Label>
                     <Input
                       type="number"
-                      step="0.1"
-                      value={promotionData.thisWeek.cost || ''}
+                      step="0.01"
+                      value={promotionData.thisWeek.cost === 0 ? '' : promotionData.thisWeek.cost.toString()}
                       onChange={(e) => {
-                        const val = parseFloat(e.target.value) || 0;
-                        setPromotionData(prev => ({
-                          ...prev,
-                          thisWeek: { ...prev.thisWeek, cost: val }
-                        }));
+                        const inputValue = e.target.value;
+                        if (inputValue === '') {
+                          setPromotionData(prev => ({
+                            ...prev,
+                            thisWeek: { ...prev.thisWeek, cost: 0 }
+                          }));
+                          return;
+                        }
+                        const val = parseFloat(inputValue);
+                        if (!isNaN(val) && val >= 0) {
+                          setPromotionData(prev => ({
+                            ...prev,
+                            thisWeek: { ...prev.thisWeek, cost: val }
+                          }));
+                        }
                       }}
                       placeholder="推广花费"
                     />
@@ -655,14 +665,24 @@ export function DataInputForm({ onSubmit }: DataInputFormProps) {
                     <Label>进店率 (%)</Label>
                     <Input
                       type="number"
-                      step="0.1"
-                      value={promotionData.thisWeek.visitRate || ''}
+                      step="0.01"
+                      value={promotionData.thisWeek.visitRate === 0 ? '' : promotionData.thisWeek.visitRate.toString()}
                       onChange={(e) => {
-                        const val = parseFloat(e.target.value) || 0;
-                        setPromotionData(prev => ({
-                          ...prev,
-                          thisWeek: { ...prev.thisWeek, visitRate: val }
-                        }));
+                        const inputValue = e.target.value;
+                        if (inputValue === '') {
+                          setPromotionData(prev => ({
+                            ...prev,
+                            thisWeek: { ...prev.thisWeek, visitRate: 0 }
+                          }));
+                          return;
+                        }
+                        const val = parseFloat(inputValue);
+                        if (!isNaN(val) && val >= 0 && val <= 100) {
+                          setPromotionData(prev => ({
+                            ...prev,
+                            thisWeek: { ...prev.thisWeek, visitRate: val }
+                          }));
+                        }
                       }}
                       placeholder="进店率"
                     />
@@ -672,14 +692,24 @@ export function DataInputForm({ onSubmit }: DataInputFormProps) {
                     <Label>单次进店成本 (¥)</Label>
                     <Input
                       type="number"
-                      step="0.1"
-                      value={promotionData.thisWeek.costPerVisit || ''}
+                      step="0.01"
+                      value={promotionData.thisWeek.costPerVisit === 0 ? '' : promotionData.thisWeek.costPerVisit.toString()}
                       onChange={(e) => {
-                        const val = parseFloat(e.target.value) || 0;
-                        setPromotionData(prev => ({
-                          ...prev,
-                          thisWeek: { ...prev.thisWeek, costPerVisit: val }
-                        }));
+                        const inputValue = e.target.value;
+                        if (inputValue === '') {
+                          setPromotionData(prev => ({
+                            ...prev,
+                            thisWeek: { ...prev.thisWeek, costPerVisit: 0 }
+                          }));
+                          return;
+                        }
+                        const val = parseFloat(inputValue);
+                        if (!isNaN(val) && val >= 0) {
+                          setPromotionData(prev => ({
+                            ...prev,
+                            thisWeek: { ...prev.thisWeek, costPerVisit: val }
+                          }));
+                        }
                       }}
                       placeholder="单次进店成本"
                     />
@@ -695,14 +725,24 @@ export function DataInputForm({ onSubmit }: DataInputFormProps) {
                     <Label>推广花费 (¥)</Label>
                     <Input
                       type="number"
-                      step="0.1"
-                      value={promotionData.lastWeek.cost || ''}
+                      step="0.01"
+                      value={promotionData.lastWeek.cost === 0 ? '' : promotionData.lastWeek.cost.toString()}
                       onChange={(e) => {
-                        const val = parseFloat(e.target.value) || 0;
-                        setPromotionData(prev => ({
-                          ...prev,
-                          lastWeek: { ...prev.lastWeek, cost: val }
-                        }));
+                        const inputValue = e.target.value;
+                        if (inputValue === '') {
+                          setPromotionData(prev => ({
+                            ...prev,
+                            lastWeek: { ...prev.lastWeek, cost: 0 }
+                          }));
+                          return;
+                        }
+                        const val = parseFloat(inputValue);
+                        if (!isNaN(val) && val >= 0) {
+                          setPromotionData(prev => ({
+                            ...prev,
+                            lastWeek: { ...prev.lastWeek, cost: val }
+                          }));
+                        }
                       }}
                       placeholder="推广花费"
                     />
@@ -744,14 +784,24 @@ export function DataInputForm({ onSubmit }: DataInputFormProps) {
                     <Label>进店率 (%)</Label>
                     <Input
                       type="number"
-                      step="0.1"
-                      value={promotionData.lastWeek.visitRate || ''}
+                      step="0.01"
+                      value={promotionData.lastWeek.visitRate === 0 ? '' : promotionData.lastWeek.visitRate.toString()}
                       onChange={(e) => {
-                        const val = parseFloat(e.target.value) || 0;
-                        setPromotionData(prev => ({
-                          ...prev,
-                          lastWeek: { ...prev.lastWeek, visitRate: val }
-                        }));
+                        const inputValue = e.target.value;
+                        if (inputValue === '') {
+                          setPromotionData(prev => ({
+                            ...prev,
+                            lastWeek: { ...prev.lastWeek, visitRate: 0 }
+                          }));
+                          return;
+                        }
+                        const val = parseFloat(inputValue);
+                        if (!isNaN(val) && val >= 0 && val <= 100) {
+                          setPromotionData(prev => ({
+                            ...prev,
+                            lastWeek: { ...prev.lastWeek, visitRate: val }
+                          }));
+                        }
                       }}
                       placeholder="进店率"
                     />
@@ -761,14 +811,24 @@ export function DataInputForm({ onSubmit }: DataInputFormProps) {
                     <Label>单次进店成本 (¥)</Label>
                     <Input
                       type="number"
-                      step="0.1"
-                      value={promotionData.lastWeek.costPerVisit || ''}
+                      step="0.01"
+                      value={promotionData.lastWeek.costPerVisit === 0 ? '' : promotionData.lastWeek.costPerVisit.toString()}
                       onChange={(e) => {
-                        const val = parseFloat(e.target.value) || 0;
-                        setPromotionData(prev => ({
-                          ...prev,
-                          lastWeek: { ...prev.lastWeek, costPerVisit: val }
-                        }));
+                        const inputValue = e.target.value;
+                        if (inputValue === '') {
+                          setPromotionData(prev => ({
+                            ...prev,
+                            lastWeek: { ...prev.lastWeek, costPerVisit: 0 }
+                          }));
+                          return;
+                        }
+                        const val = parseFloat(inputValue);
+                        if (!isNaN(val) && val >= 0) {
+                          setPromotionData(prev => ({
+                            ...prev,
+                            lastWeek: { ...prev.lastWeek, costPerVisit: val }
+                          }));
+                        }
                       }}
                       placeholder="单次进店成本"
                     />

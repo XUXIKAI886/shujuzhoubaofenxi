@@ -37,6 +37,16 @@ npm run test:quick   # 快速测试
 npm run test:coverage # 测试覆盖率报告
 ```
 
+### 部署命令
+```bash
+# Vercel部署（推荐）
+npm run build        # 验证构建是否成功
+vercel               # 部署到Vercel
+
+# 其他部署平台
+npm run build && npm start  # 本地生产环境测试
+```
+
 ## 核心架构模式
 
 ### 数据流架构
@@ -66,8 +76,9 @@ npm run test:coverage # 测试覆盖率报告
 
 ### API集成模式
 - 使用环境变量配置API端点 (`API_BASE_URL`, `API_MODEL`)
-- 实现30秒超时和3次重试机制
-- API密钥通过客户端输入，不存储在服务器
+- 实现60秒超时和3次重试机制，支持指数退避
+- API密钥内置在客户端代码中（生产环境需要通过环境变量配置）
+- 支持Gemini API格式，可扩展支持其他AI服务商
 
 ### 安全实践
 - 使用DOMPurify清理所有HTML内容
@@ -91,12 +102,15 @@ npm run test:coverage # 测试覆盖率报告
 ```
 app/api/generate-report/route.ts  # 核心API端点，处理报告生成
 lib/api-client.ts                 # Gemini API集成，重试和错误处理
-lib/prompt-templates.ts           # AI提示词模板系统
+lib/prompt-templates.ts           # AI提示词模板系统，含详细HTML模板
 lib/types.ts                      # 完整TypeScript类型定义
-lib/validations.ts               # Zod验证schemas
-components/DataInputForm.tsx      # 核心数据输入组件
-components/ReportDisplay.tsx      # 安全HTML报告渲染
-__tests__/test-runner.js         # 自定义测试运行器
+lib/validations.ts               # Zod验证schemas，含业务逻辑验证
+lib/hooks/useLocalStorage.ts      # 数据持久化Hook
+components/DataInputForm.tsx      # 核心数据输入组件（支持推广数据）
+components/ReportDisplay.tsx      # 安全HTML报告渲染（DOMPurify净化）
+__tests__/test-runner.js         # 自定义测试运行器（支持多种测试模式）
+vercel.json                      # Vercel部署配置，包含安全头部
+next.config.js                   # Next.js配置，安全头部和构建设置
 ```
 
 ## 扩展开发指南
@@ -112,3 +126,37 @@ __tests__/test-runner.js         # 自定义测试运行器
 2. 添加相应的环境变量配置
 3. 实现统一的错误处理和重试逻辑
 4. 更新类型定义以支持不同的响应格式
+
+## 关键代码模式
+
+### API客户端重试机制
+```typescript
+// lib/api-client.ts 
+// 实现了指数退避重试策略：3次重试，每次间隔递增
+const maxRetries = 3;
+const retryDelay = 1000 * attempt; // 指数退避
+```
+
+### 数据验证层级
+```typescript
+// lib/validations.ts
+// 1. 基础类型验证 (Zod schema)
+// 2. 业务逻辑验证 (数据一致性)
+// 3. 异常情况检测 (convertedRate允许5%误差)
+```
+
+### HTML安全渲染
+```typescript
+// components/ReportDisplay.tsx
+// 使用DOMPurify净化所有HTML内容
+import DOMPurify from 'isomorphic-dompurify';
+const cleanHTML = DOMPurify.sanitize(htmlContent);
+```
+
+### 测试运行器使用
+```bash
+# 使用自定义测试运行器 __tests__/test-runner.js
+node __tests__/test-runner.js all        # 完整测试套件
+node __tests__/test-runner.js security   # 只运行安全测试
+node __tests__/test-runner.js watch      # 监听模式
+```
