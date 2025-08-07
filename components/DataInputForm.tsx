@@ -12,7 +12,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { useLocalStorage, clearLocalStorageItem } from '@/lib/hooks/useLocalStorage';
 
 interface DataInputFormProps {
-  onSubmit: (operationData: ShopOperationData, promotionData?: PromotionData, adjustmentData: ShopAdjustmentData) => void;
+  onSubmit: (operationData: ShopOperationData, adjustmentData: ShopAdjustmentData, promotionData?: PromotionData) => void;
 }
 
 // 输入字段组件
@@ -177,7 +177,7 @@ export function DataInputForm({ onSubmit }: DataInputFormProps) {
   // 当增长数据变化时自动计算上周数据
   useEffect(() => {
     updateLastWeekData();
-  }, [weeklyGrowth]); // 只依赖于weeklyGrowth，避免无限循环
+  }, [weeklyGrowth, updateLastWeekData]); // 包含所有依赖
 
   // 辅助函数：更新本周数据并重新计算上周数据
   const updateThisWeekData = useCallback((field: keyof typeof operationData.thisWeek, value: number) => {
@@ -187,7 +187,7 @@ export function DataInputForm({ onSubmit }: DataInputFormProps) {
     }));
     // 延迟计算上周数据，确保状态已更新
     setTimeout(updateLastWeekData, 0);
-  }, [updateLastWeekData]);
+  }, [operationData, setOperationData, updateLastWeekData]);
 
   // 重置表单数据
   const resetFormData = () => {
@@ -327,7 +327,7 @@ export function DataInputForm({ onSubmit }: DataInputFormProps) {
       }
 
       setErrors({});
-      await onSubmit(validatedOperationData, validatedPromotionData, validatedAdjustmentData);
+      await onSubmit(validatedOperationData, validatedAdjustmentData, validatedPromotionData);
     } catch (error) {
       if (error instanceof z.ZodError) {
         const newErrors: Record<string, string> = {};

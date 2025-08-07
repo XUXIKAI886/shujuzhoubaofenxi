@@ -24,7 +24,7 @@ export default function HomePage() {
     setCurrentStep('data-input');
   };
 
-  const handleDataSubmit = async (operation: ShopOperationData, promotion?: PromotionData, adjustment?: ShopAdjustmentData) => {
+  const handleDataSubmit = async (operation: ShopOperationData, adjustment?: ShopAdjustmentData, promotion?: PromotionData) => {
     setOperationData(operation);
     setPromotionData(promotion);
     setAdjustmentData(adjustment);
