@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ShopBasicInfo, ShopOperationData, PromotionData, ReportData } from '@/lib/types';
+import { ShopBasicInfo, ShopOperationData, PromotionData, ShopAdjustmentData, ReportData } from '@/lib/types';
 import { ShopInfoForm } from '@/components/ShopInfoForm';
 import { DataInputForm } from '@/components/DataInputForm';
 import { ReportDisplay } from '@/components/ReportDisplay';
@@ -15,6 +15,7 @@ export default function HomePage() {
   const [shopInfo, setShopInfo] = useState<ShopBasicInfo | null>(null);
   const [operationData, setOperationData] = useState<ShopOperationData | null>(null);
   const [promotionData, setPromotionData] = useState<PromotionData | undefined>(undefined);
+  const [adjustmentData, setAdjustmentData] = useState<ShopAdjustmentData | undefined>(undefined);
   const [reportHtml, setReportHtml] = useState('');
   const [error, setError] = useState('');
 
@@ -23,10 +24,11 @@ export default function HomePage() {
     setCurrentStep('data-input');
   };
 
-  const handleDataSubmit = async (operation: ShopOperationData, promotion?: PromotionData) => {
+  const handleDataSubmit = async (operation: ShopOperationData, promotion?: PromotionData, adjustment?: ShopAdjustmentData) => {
     setOperationData(operation);
     setPromotionData(promotion);
-    
+    setAdjustmentData(adjustment);
+
     // 直接开始生成报告，无需API配置步骤
     setCurrentStep('generating');
     setError('');
@@ -35,6 +37,7 @@ export default function HomePage() {
       shopInfo: shopInfo!,
       operationData: operation,
       promotionData: promotion,
+      adjustmentData: adjustment,
       generatedAt: new Date().toISOString()
     };
 

@@ -1,7 +1,7 @@
 import { ReportData } from './types';
 
 export function buildReportPrompt(data: ReportData): string {
-  const { shopInfo, operationData, promotionData } = data;
+  const { shopInfo, operationData, promotionData, adjustmentData } = data;
   
   // 计算数据变化
   const calculateChange = (current: number, previous: number) => {
@@ -41,6 +41,26 @@ export function buildReportPrompt(data: ReportData): string {
     `;
   }
 
+  let adjustmentSection = '';
+  if (adjustmentData) {
+    const thisWeekItems = adjustmentData.thisWeekAdjustments.length > 0
+      ? adjustmentData.thisWeekAdjustments.map(item => `- ${item}`).join('\n')
+      : '- 无调整项目';
+
+    const lastWeekItems = adjustmentData.lastWeekAdjustments.length > 0
+      ? adjustmentData.lastWeekAdjustments.map(item => `- ${item}`).join('\n')
+      : '- 无调整项目';
+
+    adjustmentSection = `
+### 店铺调整项目分析
+#### 本周调整项目（${adjustmentData.thisWeekAdjustments.length}项）
+${thisWeekItems}
+
+#### 上周调整项目（${adjustmentData.lastWeekAdjustments.length}项）
+${lastWeekItems}
+    `;
+  }
+
   return `
 **【重要】直接返回完整的HTML代码，使用现代化企业级报告设计风格**
 
@@ -70,6 +90,8 @@ export function buildReportPrompt(data: ReportData): string {
 - 复购率：${operationData.lastWeek.repurchaseRate}%
 
 ${promotionSection}
+
+${adjustmentSection}
 
 **数据表格要求**：必须生成专业的HTML表格，包含以下数据：
 
@@ -116,6 +138,13 @@ ${promotionData ? `
 - 分析原因和影响因素
 - 提供具体的数据洞察
 - 内容完整，不能截断
+${adjustmentData ? `
+- **店铺调整项目分析**：
+  - 分析本周和上周的调整项目差异
+  - 评估各调整项目对数据变化的潜在影响
+  - 识别调整项目与关键指标变化的关联性
+  - 基于调整项目提供针对性的改进建议
+  - 分析调整项目的执行效果和优化方向` : ''}
 
 ## 5. 视觉美化要求
 - 使用卡片式设计，添加阴影效果

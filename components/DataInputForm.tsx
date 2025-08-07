@@ -2,8 +2,8 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { z } from 'zod';
-import { ShopOperationData, PromotionData } from '@/lib/types';
-import { operationDataSchema, promotionDataSchema } from '@/lib/validations';
+import { ShopOperationData, PromotionData, ShopAdjustmentData, ShopAdjustmentOption } from '@/lib/types';
+import { operationDataSchema, promotionDataSchema, shopAdjustmentDataSchema } from '@/lib/validations';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -12,7 +12,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { useLocalStorage, clearLocalStorageItem } from '@/lib/hooks/useLocalStorage';
 
 interface DataInputFormProps {
-  onSubmit: (operationData: ShopOperationData, promotionData?: PromotionData) => void;
+  onSubmit: (operationData: ShopOperationData, promotionData?: PromotionData, adjustmentData?: ShopAdjustmentData) => void;
 }
 
 export function DataInputForm({ onSubmit }: DataInputFormProps) {
@@ -64,8 +64,41 @@ export function DataInputForm({ onSubmit }: DataInputFormProps) {
     }
   });
 
+  // 店铺调整项目数据
+  const [includeAdjustments, setIncludeAdjustments] = useLocalStorage<boolean>('reportForm_includeAdjustments', false);
+  const [adjustmentData, setAdjustmentData] = useLocalStorage<ShopAdjustmentData>('reportForm_adjustmentData', {
+    thisWeekAdjustments: [],
+    lastWeekAdjustments: []
+  });
+
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // 处理调整项目多选框变化
+  const handleAdjustmentChange = (option: ShopAdjustmentOption, period: 'thisWeek' | 'lastWeek', checked: boolean) => {
+    setAdjustmentData(prev => {
+      const field = period === 'thisWeek' ? 'thisWeekAdjustments' : 'lastWeekAdjustments';
+      const currentOptions = prev[field];
+
+      if (checked) {
+        // 添加选项（如果不存在）
+        if (!currentOptions.includes(option)) {
+          return {
+            ...prev,
+            [field]: [...currentOptions, option]
+          };
+        }
+      } else {
+        // 移除选项
+        return {
+          ...prev,
+          [field]: currentOptions.filter(item => item !== option)
+        };
+      }
+
+      return prev;
+    });
+  };
 
   // 自动计算上周数据的函数
   const updateLastWeekData = useCallback(() => {
@@ -214,14 +247,19 @@ export function DataInputForm({ onSubmit }: DataInputFormProps) {
     try {
       const validatedOperationData = operationDataSchema.parse(operationData);
       let validatedPromotionData: PromotionData | undefined;
-      
+      let validatedAdjustmentData: ShopAdjustmentData | undefined;
+
       if (includePromotion) {
         validatedPromotionData = promotionDataSchema.parse(promotionData);
       }
-      
+
+      if (includeAdjustments) {
+        validatedAdjustmentData = shopAdjustmentDataSchema.parse(adjustmentData);
+      }
+
       // 业务逻辑验证
       const businessWarnings = validateBusinessLogic(validatedOperationData, validatedPromotionData);
-      
+
       if (businessWarnings.length > 0) {
         const confirmed = window.confirm(
           `检测到以下数据异常，是否继续生成报告？\n\n${businessWarnings.join('\n')}`
@@ -231,9 +269,9 @@ export function DataInputForm({ onSubmit }: DataInputFormProps) {
           return;
         }
       }
-      
+
       setErrors({});
-      await onSubmit(validatedOperationData, validatedPromotionData);
+      await onSubmit(validatedOperationData, validatedPromotionData, validatedAdjustmentData);
     } catch (error) {
       if (error instanceof z.ZodError) {
         const newErrors: Record<string, string> = {};
@@ -833,6 +871,72 @@ export function DataInputForm({ onSubmit }: DataInputFormProps) {
                       placeholder="单次进店成本"
                     />
                   </div>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        )}
+      </Card>
+
+      {/* 店铺调整项目（可选） */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            <Checkbox
+              checked={includeAdjustments}
+              onCheckedChange={(checked) => setIncludeAdjustments(checked === true)}
+            />
+            <span>店铺调整项目（可选）</span>
+          </CardTitle>
+        </CardHeader>
+        {includeAdjustments && (
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* 本周调整项目 */}
+              <div>
+                <h4 className="text-lg font-medium mb-4">本周店铺调整项目</h4>
+                <div className="space-y-3 max-h-80 overflow-y-auto">
+                  {Object.values(ShopAdjustmentOption).map((option) => (
+                    <div key={`thisWeek-${option}`} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`thisWeek-${option}`}
+                        checked={adjustmentData.thisWeekAdjustments.includes(option)}
+                        onCheckedChange={(checked) =>
+                          handleAdjustmentChange(option, 'thisWeek', checked === true)
+                        }
+                      />
+                      <Label
+                        htmlFor={`thisWeek-${option}`}
+                        className="text-sm leading-relaxed cursor-pointer"
+                      >
+                        {option}
+                      </Label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* 上周调整项目 */}
+              <div>
+                <h4 className="text-lg font-medium mb-4">上周店铺调整项目</h4>
+                <div className="space-y-3 max-h-80 overflow-y-auto">
+                  {Object.values(ShopAdjustmentOption).map((option) => (
+                    <div key={`lastWeek-${option}`} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`lastWeek-${option}`}
+                        checked={adjustmentData.lastWeekAdjustments.includes(option)}
+                        onCheckedChange={(checked) =>
+                          handleAdjustmentChange(option, 'lastWeek', checked === true)
+                        }
+                      />
+                      <Label
+                        htmlFor={`lastWeek-${option}`}
+                        className="text-sm leading-relaxed cursor-pointer"
+                      >
+                        {option}
+                      </Label>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>

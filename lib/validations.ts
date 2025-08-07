@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { ShopAdjustmentOption } from './types';
 
 // 店铺基本信息验证
 export const shopInfoSchema = z.object({
@@ -59,6 +60,14 @@ export const promotionDataSchema = z.object({
     visitRate: z.number().min(0).max(100, '进店率应在0-100%之间'),
     costPerVisit: z.number().min(0, '单次成本不能为负数')
   })
+});
+
+// 店铺调整项目验证
+export const shopAdjustmentDataSchema = z.object({
+  thisWeekAdjustments: z.array(z.nativeEnum(ShopAdjustmentOption))
+    .max(17, '最多只能选择17个调整项目'),
+  lastWeekAdjustments: z.array(z.nativeEnum(ShopAdjustmentOption))
+    .max(17, '最多只能选择17个调整项目')
 });
 
 // 业务逻辑验证函数
