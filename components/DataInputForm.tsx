@@ -12,7 +12,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { useLocalStorage, clearLocalStorageItem } from '@/lib/hooks/useLocalStorage';
 
 interface DataInputFormProps {
-  onSubmit: (operationData: ShopOperationData, promotionData?: PromotionData, adjustmentData?: ShopAdjustmentData) => void;
+  onSubmit: (operationData: ShopOperationData, promotionData?: PromotionData, adjustmentData: ShopAdjustmentData) => void;
 }
 
 export function DataInputForm({ onSubmit }: DataInputFormProps) {
@@ -64,8 +64,7 @@ export function DataInputForm({ onSubmit }: DataInputFormProps) {
     }
   });
 
-  // 店铺调整项目数据
-  const [includeAdjustments, setIncludeAdjustments] = useLocalStorage<boolean>('reportForm_includeAdjustments', false);
+  // 店铺调整项目数据（必选）
   const [adjustmentData, setAdjustmentData] = useLocalStorage<ShopAdjustmentData>('reportForm_adjustmentData', {
     thisWeekAdjustments: [],
     lastWeekAdjustments: []
@@ -247,15 +246,13 @@ export function DataInputForm({ onSubmit }: DataInputFormProps) {
     try {
       const validatedOperationData = operationDataSchema.parse(operationData);
       let validatedPromotionData: PromotionData | undefined;
-      let validatedAdjustmentData: ShopAdjustmentData | undefined;
 
       if (includePromotion) {
         validatedPromotionData = promotionDataSchema.parse(promotionData);
       }
 
-      if (includeAdjustments) {
-        validatedAdjustmentData = shopAdjustmentDataSchema.parse(adjustmentData);
-      }
+      // 店铺调整项目为必选项
+      const validatedAdjustmentData = shopAdjustmentDataSchema.parse(adjustmentData);
 
       // 业务逻辑验证
       const businessWarnings = validateBusinessLogic(validatedOperationData, validatedPromotionData);
@@ -878,18 +875,12 @@ export function DataInputForm({ onSubmit }: DataInputFormProps) {
         )}
       </Card>
 
-      {/* 店铺调整项目（可选） */}
+      {/* 店铺调整项目（必选） */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <Checkbox
-              checked={includeAdjustments}
-              onCheckedChange={(checked) => setIncludeAdjustments(checked === true)}
-            />
-            <span>店铺调整项目（可选）</span>
-          </CardTitle>
+          <CardTitle>店铺调整项目</CardTitle>
         </CardHeader>
-        {includeAdjustments && (
+        <CardContent>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* 本周调整项目 */}
@@ -941,7 +932,6 @@ export function DataInputForm({ onSubmit }: DataInputFormProps) {
               </div>
             </div>
           </CardContent>
-        )}
       </Card>
 
       <div className="flex gap-4">
