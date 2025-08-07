@@ -15,6 +15,65 @@ interface DataInputFormProps {
   onSubmit: (operationData: ShopOperationData, promotionData?: PromotionData, adjustmentData: ShopAdjustmentData) => void;
 }
 
+// 输入字段组件
+const NumberInput: React.FC<{
+  label: string;
+  value: number;
+  onChange: (value: number) => void;
+  isPercentage?: boolean;
+  isInteger?: boolean;
+  errorKey?: string;
+  errors?: Record<string, string>;
+}> = ({
+  label,
+  value,
+  onChange,
+  isPercentage = false,
+  isInteger = false,
+  errorKey,
+  errors = {}
+}) => (
+  <div>
+    <Label>{label} {isPercentage && '(%)'}</Label>
+    <Input
+      type="number"
+      value={value.toString()}
+      onChange={(e) => {
+        const inputValue = e.target.value;
+
+        // 允许空输入（用户正在清空输入框）
+        if (inputValue === '') {
+          onChange(0);
+          return;
+        }
+
+        // 解析数值
+        const parsedValue = parseFloat(inputValue);
+
+        // 检查是否为有效数字
+        if (!isNaN(parsedValue)) {
+          let finalValue = isInteger ? Math.floor(parsedValue) : parsedValue;
+
+          // 应用边界限制
+          finalValue = Math.max(0, finalValue);
+          if (isPercentage) {
+            finalValue = Math.min(100, finalValue);
+          }
+
+          onChange(finalValue);
+        }
+      }}
+      step={isInteger ? 1 : 0.1}
+      min={0}
+      max={isPercentage ? 100 : undefined}
+      className={errorKey && errors[errorKey] ? 'border-red-500' : ''}
+    />
+    {errorKey && errors[errorKey] && (
+      <p className="text-sm text-red-500 mt-1">{errors[errorKey]}</p>
+    )}
+  </div>
+);
+
 export function DataInputForm({ onSubmit }: DataInputFormProps) {
   // 使用localStorage持久化表单数据
   const [operationData, setOperationData] = useLocalStorage<ShopOperationData>('reportForm_operationData', {
@@ -288,62 +347,7 @@ export function DataInputForm({ onSubmit }: DataInputFormProps) {
     }
   };
 
-  // 输入字段组件
-  const NumberInput = ({ 
-    label, 
-    value, 
-    onChange, 
-    isPercentage = false,
-    isInteger = false,
-    errorKey
-  }: {
-    label: string;
-    value: number;
-    onChange: (value: number) => void;
-    isPercentage?: boolean;
-    isInteger?: boolean;
-    errorKey?: string;
-  }) => (
-    <div>
-      <Label>{label} {isPercentage && '(%)'}</Label>
-      <Input
-        type="number"
-        value={value.toString()}
-        onChange={(e) => {
-          const inputValue = e.target.value;
-          
-          // 允许空输入（用户正在清空输入框）
-          if (inputValue === '') {
-            onChange(0);
-            return;
-          }
-          
-          // 解析数值
-          const parsedValue = parseFloat(inputValue);
-          
-          // 检查是否为有效数字
-          if (!isNaN(parsedValue)) {
-            let finalValue = isInteger ? Math.floor(parsedValue) : parsedValue;
-            
-            // 应用边界限制
-            finalValue = Math.max(0, finalValue);
-            if (isPercentage) {
-              finalValue = Math.min(100, finalValue);
-            }
-            
-            onChange(finalValue);
-          }
-        }}
-        step={isInteger ? 1 : 0.1}
-        min={0}
-        max={isPercentage ? 100 : undefined}
-        className={errorKey && errors[errorKey] ? 'border-red-500' : ''}
-      />
-      {errorKey && errors[errorKey] && (
-        <p className="text-sm text-red-500 mt-1">{errors[errorKey]}</p>
-      )}
-    </div>
-  );
+
 
   return (
     <div className="space-y-6">
@@ -619,6 +623,64 @@ export function DataInputForm({ onSubmit }: DataInputFormProps) {
         </CardContent>
       </Card>
 
+      {/* 店铺调整项目（必选） */}
+      <Card>
+        <CardHeader>
+          <CardTitle>店铺调整项目</CardTitle>
+        </CardHeader>
+        <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* 本周调整项目 */}
+              <div>
+                <h4 className="text-lg font-medium mb-4">本周店铺调整项目</h4>
+                <div className="space-y-3 max-h-80 overflow-y-auto">
+                  {Object.values(ShopAdjustmentOption).map((option) => (
+                    <div key={`thisWeek-${option}`} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`thisWeek-${option}`}
+                        checked={adjustmentData.thisWeekAdjustments.includes(option)}
+                        onCheckedChange={(checked) =>
+                          handleAdjustmentChange(option, 'thisWeek', checked === true)
+                        }
+                      />
+                      <Label
+                        htmlFor={`thisWeek-${option}`}
+                        className="text-sm leading-relaxed cursor-pointer"
+                      >
+                        {option}
+                      </Label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* 上周调整项目 */}
+              <div>
+                <h4 className="text-lg font-medium mb-4">上周店铺调整项目</h4>
+                <div className="space-y-3 max-h-80 overflow-y-auto">
+                  {Object.values(ShopAdjustmentOption).map((option) => (
+                    <div key={`lastWeek-${option}`} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`lastWeek-${option}`}
+                        checked={adjustmentData.lastWeekAdjustments.includes(option)}
+                        onCheckedChange={(checked) =>
+                          handleAdjustmentChange(option, 'lastWeek', checked === true)
+                        }
+                      />
+                      <Label
+                        htmlFor={`lastWeek-${option}`}
+                        className="text-sm leading-relaxed cursor-pointer"
+                      >
+                        {option}
+                      </Label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </CardContent>
+      </Card>
+
       {/* 点金推广数据（可选） */}
       <Card>
         <CardHeader>
@@ -873,65 +935,6 @@ export function DataInputForm({ onSubmit }: DataInputFormProps) {
             </div>
           </CardContent>
         )}
-      </Card>
-
-      {/* 店铺调整项目（必选） */}
-      <Card>
-        <CardHeader>
-          <CardTitle>店铺调整项目</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* 本周调整项目 */}
-              <div>
-                <h4 className="text-lg font-medium mb-4">本周店铺调整项目</h4>
-                <div className="space-y-3 max-h-80 overflow-y-auto">
-                  {Object.values(ShopAdjustmentOption).map((option) => (
-                    <div key={`thisWeek-${option}`} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={`thisWeek-${option}`}
-                        checked={adjustmentData.thisWeekAdjustments.includes(option)}
-                        onCheckedChange={(checked) =>
-                          handleAdjustmentChange(option, 'thisWeek', checked === true)
-                        }
-                      />
-                      <Label
-                        htmlFor={`thisWeek-${option}`}
-                        className="text-sm leading-relaxed cursor-pointer"
-                      >
-                        {option}
-                      </Label>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* 上周调整项目 */}
-              <div>
-                <h4 className="text-lg font-medium mb-4">上周店铺调整项目</h4>
-                <div className="space-y-3 max-h-80 overflow-y-auto">
-                  {Object.values(ShopAdjustmentOption).map((option) => (
-                    <div key={`lastWeek-${option}`} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={`lastWeek-${option}`}
-                        checked={adjustmentData.lastWeekAdjustments.includes(option)}
-                        onCheckedChange={(checked) =>
-                          handleAdjustmentChange(option, 'lastWeek', checked === true)
-                        }
-                      />
-                      <Label
-                        htmlFor={`lastWeek-${option}`}
-                        className="text-sm leading-relaxed cursor-pointer"
-                      >
-                        {option}
-                      </Label>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </CardContent>
       </Card>
 
       <div className="flex gap-4">

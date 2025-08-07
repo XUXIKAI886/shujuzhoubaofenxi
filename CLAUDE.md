@@ -81,10 +81,10 @@ npm run build && npm start  # 本地生产环境测试
 - 支持Gemini API格式，可扩展支持其他AI服务商
 
 ### 安全实践
-- 使用DOMPurify清理所有HTML内容
-- Zod验证所有用户输入
+- ⚠️ **注意**：当前代码中DOMPurify被完全绕过，HTML内容直接渲染（存在XSS风险）
+- Zod验证所有用户输入，包含业务逻辑验证
 - API路由实现错误边界处理
-- 客户端API密钥临时使用不持久化
+- 内置API密钥：`sk-5J05SHfZKhaBu4ysLuBQFBXJwtgJ6mZ8eHLmcNqG1ixOSKlL`（生产环境需要环境变量配置）
 
 ### 数据验证规则
 - 整数字段：曝光人数、入店人数、下单人数等
@@ -129,12 +129,25 @@ next.config.js                   # Next.js配置，安全头部和构建设置
 
 ## 关键代码模式
 
+### 核心组件架构：DataInputForm.tsx (970行)
+```typescript
+// 复杂的三列布局数据输入表单：
+// 1. 本周数据（用户输入） | 2. 增长数据（用户输入） | 3. 上周数据（自动计算）
+// 关键特性：
+- NumberInput组件：支持整数/百分比输入，实时验证
+- 店铺调整项目：17个选项，必选至少一个
+- 推广数据模块：可选启用，包含推广曝光、点击、消费等
+- localStorage持久化：useLocalStorage Hook自动保存表单数据
+- 业务逻辑验证：本周 - 增长 = 上周（允许5%误差范围）
+```
+
 ### API客户端重试机制
 ```typescript
 // lib/api-client.ts 
-// 实现了指数退避重试策略：3次重试，每次间隔递增
+// 实现了固定间隔重试策略：3次重试，每次间隔1秒
 const maxRetries = 3;
-const retryDelay = 1000 * attempt; // 指数退避
+const retryDelay = 1000; // 固定1秒间隔，非指数退避
+// 60秒超时保护，内置API密钥：sk-5J05SHfZKhaBu4ysLuBQFBXJwtgJ6mZ8eHLmcNqG1ixOSKlL
 ```
 
 ### 数据验证层级
@@ -143,14 +156,27 @@ const retryDelay = 1000 * attempt; // 指数退避
 // 1. 基础类型验证 (Zod schema)
 // 2. 业务逻辑验证 (数据一致性)
 // 3. 异常情况检测 (convertedRate允许5%误差)
+// 4. 店铺调整项目验证 (17个选项，必选)
 ```
 
-### HTML安全渲染
+### 店铺调整项目枚举
 ```typescript
-// components/ReportDisplay.tsx
-// 使用DOMPurify净化所有HTML内容
-import DOMPurify from 'isomorphic-dompurify';
-const cleanHTML = DOMPurify.sanitize(htmlContent);
+// lib/types.ts - 17个专业调整选项
+export enum ShopAdjustmentOption {
+  MARKET_RESEARCH = '商圈调研和店铺方案的制定',
+  STORE_DESIGN = '店招海报头像的设计并上线',
+  // ... 15个其他专业选项
+}
+```
+
+### AI提示词系统
+```typescript
+// lib/prompt-templates.ts
+// 结构化提示词生成，包含：
+- 专业HTML模板（蓝色主题 #2563eb）
+- 数据可视化表格设计
+- 个性化建议生成逻辑
+- 企业级报告格式规范
 ```
 
 ### 测试运行器使用
@@ -160,3 +186,18 @@ node __tests__/test-runner.js all        # 完整测试套件
 node __tests__/test-runner.js security   # 只运行安全测试
 node __tests__/test-runner.js watch      # 监听模式
 ```
+
+## 开发工作流程
+
+### 添加新数据字段的完整流程
+1. **类型定义** (`lib/types.ts`): 更新相关interface
+2. **数据验证** (`lib/validations.ts`): 添加Zod验证规则
+3. **表单组件** (`components/DataInputForm.tsx`): 添加NumberInput组件
+4. **提示词模板** (`lib/prompt-templates.ts`): 更新AI分析逻辑
+5. **测试覆盖** (`__tests__/`): 添加对应的单元测试和集成测试
+
+### 调试常见问题
+- **API超时**: 检查网络连接，API密钥是否有效
+- **数据验证失败**: 查看浏览器console，检查Zod validation错误
+- **报告生成失败**: 检查提示词模板格式，确保数据完整性
+- **组件渲染异常**: 检查localStorage数据格式，清空缓存重试
