@@ -8,10 +8,10 @@ export class APIClient {
 
   constructor() {
     // 优先使用环境变量，如果没有则使用默认值
-    this.baseUrl = process.env.API_BASE_URL || 'https://haxiaiplus.cn/v1/chat/completions';
-    this.model = process.env.API_MODEL || 'gemini-2.5-flash-lite-preview-06-17';
+    this.baseUrl = process.env.API_BASE_URL || 'https://jeniya.top/v1/chat/completions';
+    this.model = process.env.API_MODEL || 'gemini-2.5-flash-lite';
     // 内置API密钥
-    this.apiKey = 'sk-5J05SHfZKhaBu4ysLuBQFBXJwtgJ6mZ8eHLmcNqG1ixOSKlL';
+    this.apiKey = 'sk-AHP64E0ntf5VEltYLSV17wTLYeV4WZ3ucJzf72u0UHXf0Hos';
   }
 
   async generateReport(data: ReportData): Promise<APIResponse> {
